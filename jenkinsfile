@@ -1,26 +1,33 @@
-pipeline{
- agent any
-
- environment {
-    TF_WORKSPACE = 'icc-dev' //Sets the Terraform Workspace
-    TF_IN_AUTOMATION = 'true'
-    AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}"
-    AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}"
+pipeline {
+    agent any
+tools {
+  terraform 'Terraform-13'
+}
+stages {
+  stage('terraform init') {
+    steps {
+        sh 'terraform init'
+    }
   }
-  stages {
-    stage('Terraform Init') {
+   stage('approve') {
       steps {
-        sh "${env.TERRAFORM_HOME}/terraform init -input=false"
-      }
+        input 'shall I deploy'
     }
-    stage('Terraform Plan') {
+  }
+  stage('terraform apply') {
       steps {
-        sh "${env.TERRAFORM_HOME}/terraform plan -out=tfplan -input=false -var-file='dev.tfvars'"
-      }
+        sh 'terraform apply'
     }
-    stage('Terraform Apply') {
+  }
+  stage('approve2') {
       steps {
-        input 'Apply Plan'
-        sh "${env.TERRAFORM_HOME}/terraform apply -input=false tfplan"
-      }
+        input 'shall I destroy'
     }
+  }
+  stage('terraform destroy') {
+      steps {
+        sh 'terraform destroy'
+    }
+  }
+}
+}
