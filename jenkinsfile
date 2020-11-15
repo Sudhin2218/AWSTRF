@@ -3,6 +3,9 @@ pipeline {
 tools {
   terraform 'Terraform-13'
 }
+environment {
+ PATH = "${PATH}:${getTerraformPath()}"
+ }
 stages {
 stage('git checkout'){
 steps{
@@ -34,5 +37,10 @@ steps{
         sh 'terraform destroy'
     }
   }
+}
+def getTerraformPath(){
+ def tfHome = tool name: 'Terraform-13', type: 'terraform'
+return tfHome
+ }
 }
 }
