@@ -1,11 +1,12 @@
 pipeline {
     agent any
+    environment {
+ PATH = "${PATH}:${getTerraformPath()}"
+ }
 tools {
   terraform 'Terraform-13'
 }
-environment {
- PATH = "${PATH}:${getTerraformPath()}"
- }
+
 stages {
 stage('git checkout'){
 steps{
@@ -43,4 +44,4 @@ def getTerraformPath(){
 return tfHome
  }
 }
-}
+
