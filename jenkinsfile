@@ -1,26 +1,27 @@
 pipeline{
  agent any
+
  environment {
- PATH = "${PATH}:${getTerraformPath()}"
- }
- stages{
- stage('terraform init and apply - dev'){
- steps{
- sh returnStatus: true, script: 'terraform workspace new dev'
- sh "terraform init"
- sh "terraform apply -var-file=dev.tvfars -auto-approve"
- }
- }
- stage('terraform init and apply - prod'){
- steps{
- sh returnStatus: true, script: 'terraform workspace new prod'
- sh "terraform init"
- sh "terraform apply -var-file=prod.tvfars -auto-approve"
- }
- }
- }
- }
- def getTerraformPath(){
- def tfHome = tool name: 'Terraform-13', type: 'terraform'
-return tfHome
- }
+    TF_WORKSPACE = 'icc-dev' //Sets the Terraform Workspace
+    TF_IN_AUTOMATION = 'true'
+    AWS_ACCESS_KEY_ID = "${AWS_ACCESS_KEY_ID}"
+    AWS_SECRET_ACCESS_KEY = "${AWS_SECRET_ACCESS_KEY}"
+  }
+  stages {
+    stage('Terraform Init') {
+      steps {
+        sh "${env.TERRAFORM_HOME}/terraform init -input=false"
+      }
+    }
+    stage('Terraform Plan') {
+      steps {
+        sh "${env.TERRAFORM_HOME}/terraform plan -out=tfplan -input=false -var-file='dev.tfvars'"
+      }
+    }
+    stage('Terraform Apply') {
+      steps {
+        input 'Apply Plan'
+        sh "${env.TERRAFORM_HOME}/terraform apply -input=false tfplan"
+      }
+    }
+  
