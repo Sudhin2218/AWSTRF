@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    environment {
- PATH = "${PATH}:${getTerraformPath()}"
- }
 tools {
   terraform 'Terraform'
 }
@@ -13,6 +10,15 @@ steps{
       git credentialsId: 'ce8e211a-9129-442d-adb9-203206938d09', url: 'https://github.com/Sudhin2218/AWSTRF/'
 }
 }
+stage(‘Set Terraform path’) {
+ steps {
+ script {
+ def tfHome = tool name: ‘Terraform’
+ env.PATH = “${tfHome}:${env.PATH}”
+ }
+ sh ‘terraform — version’
+ }
+ }
   stage('terraform init') {
     steps {
         sh 'terraform init'
@@ -39,9 +45,6 @@ steps{
     }
   }
 }
-def getTerraformPath(){
- def tfHome = tool name: 'Terraform-13', type: 'terraform'
-return tfHome
- }
+
 }
 
